@@ -1,6 +1,6 @@
 
 function powerOf2(n) {
-	return n && (n & (n - 1)) === 0;
+    return n && (n & (n - 1)) === 0;
 }
 
 var targetError   = 2.0;    //error won't go lower than this if we reach it
@@ -15,7 +15,7 @@ var drawBudget    = 5*(1<<20);
 function _Cache() {
     let t = this;
     t.cortopath = '.';
-	t.frame = 0;         //keep track of the time
+    t.frame = 0;         //keep track of the time
 
     t.maxCacheSize = maxCacheSize;
     t.minFps = minFps;
@@ -85,134 +85,134 @@ _Cache.prototype = {
 
         fps = c.currentFps;
 
-	    c.frame++;
-	    c.candidates = [];
-	    if(fps && c.minFps) {
-		    c.currentFps = fps;
-		    const r = c.minFps/fps;
-		    if(r > 1.1)
-			    c.currentError *= 1.05;
-		    if(r < 0.9)
-			    c.currentError *= 0.95;
+        c.frame++;
+        c.candidates = [];
+        if(fps && c.minFps) {
+            c.currentFps = fps;
+            const r = c.minFps/fps;
+            if(r > 1.1)
+                c.currentError *= 1.05;
+            if(r < 0.9)
+                c.currentError *= 0.95;
 
-		    c.currentError = Math.max(c.targetError, Math.min(c.maxError, c.currentError));
+            c.currentError = Math.max(c.targetError, Math.min(c.maxError, c.currentError));
 
-	    } else
-		    c.currentError = c.targetError;
+        } else
+            c.currentError = c.targetError;
 
-	    c.rendered = 0;
-	    c.realError = 1e20;
+        c.rendered = 0;
+        c.realError = 1e20;
         c.totswapped = 0;
     },
 
     endFrame: function() {
-	    this.update();
+        this.update();
     },
 
 
 
     requestNode: function(mesh, id) {
-	    mesh.status[id] = 2; //pending
+        mesh.status[id] = 2; //pending
 
-	    this.pending++;
-	    this.cacheSize += mesh.nsize[id];
-	    mesh.reqAttempt[id] = 0;
+        this.pending++;
+        this.cacheSize += mesh.nsize[id];
+        mesh.reqAttempt[id] = 0;
 
-	    this.requestNodeGeometry(mesh, id);
-	    this.requestNodeTexture(mesh, id);
+        this.requestNodeGeometry(mesh, id);
+        this.requestNodeTexture(mesh, id);
     },
 
     requestNodeGeometry: function(mesh, id) {
         let t = this;
 
-	    mesh.status[id]++; //pending
-	    mesh.georeq[id] = mesh.httpRequest(
-		    mesh.noffsets[id],
-		    mesh.noffsets[id+1],
-		    function() {
+        mesh.status[id]++; //pending
+        mesh.georeq[id] = mesh.httpRequest(
+            mesh.noffsets[id],
+            mesh.noffsets[id+1],
+            function() {
                             delete mesh.texreq[id];
                 t.loadNodeGeometry(this, mesh, id);
             },
-		    function() {
+            function() {
                             delete mesh.texreq[id];
-			    if(this.debug.verbose) console.log("Geometry request error!");
-			    t.recoverNode(mesh, id, 0);
-		    },
-		    function() {
+                if(this.debug.verbose) console.log("Geometry request error!");
+                t.recoverNode(mesh, id, 0);
+            },
+            function() {
                             delete mesh.texreq[id];
-			    if(this.debug.verbose) console.log("Geometry request abort!");
-			    t.removeNode(mesh, id);
-		    },
-		    'arraybuffer'
+                if(this.debug.verbose) console.log("Geometry request abort!");
+                t.removeNode(mesh, id);
+            },
+            'arraybuffer'
         );
     },
 
     requestNodeTexture: function(mesh, id) {
         let t = this;
-	    
-	    if(!mesh.vertex.texCoord) return;
+        
+        if(!mesh.vertex.texCoord) return;
 
-	    let tex = mesh.patches[mesh.nfirstpatch[id]*3+2];
-	    mesh.texref[tex]++;
+        let tex = mesh.patches[mesh.nfirstpatch[id]*3+2];
+        mesh.texref[tex]++;
 
-	    mesh.status[id]++; //pending
+        mesh.status[id]++; //pending
 
-	    mesh.texreq[tex] = mesh.httpRequest(
-		    mesh.textures[tex],
-		    mesh.textures[tex+1],
-		    function() { 
+        mesh.texreq[tex] = mesh.httpRequest(
+            mesh.textures[tex],
+            mesh.textures[tex+1],
+            function() { 
                         delete mesh.texreq[tex];
                 t.loadNodeTexture(this, mesh, id, tex); 
             },
-		    function() {
+            function() {
                         delete mesh.texreq[tex];
-		    	if(this.debug.verbose) console.log("Texture request error!");
-			    t.recoverNode(mesh, id, 1);
-		    },
-		    function() {
+                if(this.debug.verbose) console.log("Texture request error!");
+                t.recoverNode(mesh, id, 1);
+            },
+            function() {
                         delete mesh.texreq[tex];
-		    	if(this.debug.verbose) console.log("Texture request abort!");
-		    	t.removeNode(mesh, id);
-		    },
-		    'blob'
-	    );
+                if(this.debug.verbose) console.log("Texture request abort!");
+                t.removeNode(mesh, id);
+            },
+            'blob'
+        );
     },
 
     recoverNode: function(mesh, id, mode) {
-	    if(mesh.status[id] == 0) return;
+        if(mesh.status[id] == 0) return;
 
-	    mesh.status[id]--;
+        mesh.status[id]--;
 
         let t = this;
 
-	    if(mesh.reqAttempt[id] > maxReqAttempt) {
-		    if(this.debug.verbose) console.log("Max request limit for " + m.url + " node: " + n);
-		    t.removeNode(mesh, id);
-		    return;
-	    }
+        if(mesh.reqAttempt[id] > maxReqAttempt) {
+            if(this.debug.verbose) console.log("Max request limit for " + m.url + " node: " + n);
+            t.removeNode(mesh, id);
+            return;
+        }
 
-	    mesh.reqAttempt[id]++;
+        mesh.reqAttempt[id]++;
 
-	    switch (mode){
-		case 0:
-		    t.requestNodeGeometry(mesh, id);
-		    if(this.debug.verbose) console.log("Recovering geometry for " + m.url + " node: " + n);
-		    break;
-		case 1:
-			t.requestNodeTexture(mesh, id);
-			if(this.debug.verbose) console.log("Recovering texture for " + m.url + " node: " + n);
-			break;
-	    }
+        switch (mode){
+        case 0:
+            t.requestNodeGeometry(mesh, id);
+            if(this.debug.verbose) console.log("Recovering geometry for " + m.url + " node: " + n);
+            break;
+        case 1:
+            t.requestNodeTexture(mesh, id);
+            if(this.debug.verbose) console.log("Recovering texture for " + m.url + " node: " + n);
+            break;
+        }
     },
 
     loadNodeGeometry: function(request, mesh, id) {
-	    if(mesh.status[id] == 0) return;
+        if(mesh.status[id] == 0) return;
         
-	    if(!mesh.compressed)
-		    this.readyGeometryNode(mesh, id, request.response);
-	    else {
+        if(!mesh.compressed)
+            this.readyGeometryNode(mesh, id, request.response);
+        else {
             if(!this.corto) this.loadCorto();
-		    this.corto.postRequest( { mesh:mesh, id:id, buffer: request.response, cache: this });
+            this.corto.postRequest( { mesh:mesh, id:id, buffer: request.response, cache: this });
         }
     },
 
@@ -222,17 +222,17 @@ _Cache.prototype = {
             throw "Should not load texture twice";
         }
 
-	    let blob = request.response;
+        let blob = request.response;
         let callback = (img) => {
             if(mesh.status[id] == 0) //call was aborted.
                 return;
             mesh.createTexture(texid, img);
 
-		    mesh.status[id]--;
+            mesh.status[id]--;
 
             if(mesh.status[id] == 2)
                 this.readyNode(mesh, id);
-		    }
+            }
 
         if(typeof createImageBitmap != 'undefined') {
             var isFirefox = typeof InstallTrigger !== 'undefined';
@@ -263,27 +263,27 @@ _Cache.prototype = {
         if(mesh.status[id] == 0)
             throw "Was already removed!";
 
-	    mesh.status[id] = 0;
-	if (id in mesh.georeq && mesh.georeq[id].readyState != 4) {
+        mesh.status[id] = 0;
+    if (id in mesh.georeq && mesh.georeq[id].readyState != 4) {
             mesh.georeq[id].abort();
             delete mesh.georeq[id];
-		    this.pending--;
-	    }
+            this.pending--;
+        }
 
         this.cacheSize -= mesh.nsize[id];
         mesh.deleteNodeGeometry(id);
 
-	    if(!mesh.vertex.texCoord) return;
+        if(!mesh.vertex.texCoord) return;
 
-	    const tex = mesh.patches[mesh.nfirstpatch[id]*3+2]; //TODO assuming one texture per node
+        const tex = mesh.patches[mesh.nfirstpatch[id]*3+2]; //TODO assuming one texture per node
 
-	if (tex in mesh.texreq && mesh.texreq[tex].readyState != 4) {
+    if (tex in mesh.texreq && mesh.texreq[tex].readyState != 4) {
             mesh.texreq[tex].abort();
             delete mesh.texreq[tex];
         }
 
-	    mesh.texref[tex]--;
-    	if(mesh.texref[tex] == 0) {
+        mesh.texref[tex]--;
+        if(mesh.texref[tex] == 0) {
             mesh.deleteTexture(tex);
         }
     },
@@ -293,42 +293,42 @@ _Cache.prototype = {
             return;
         const nv = mesh.nvertices[id];
         const nf = mesh.nfaces[id];
-	    let geometry = {};
+        let geometry = {};
 
-	    
-	    if(!mesh.corto) {
-		    geometry.index  = new Uint16Array(buffer, nv*mesh.vsize,  nf*3);
+        
+        if(!mesh.corto) {
+            geometry.index  = new Uint16Array(buffer, nv*mesh.vsize,  nf*3);
             geometry.position =  new Float32Array(buffer, 0, nv*3);
 
-		    var off = nv*12;
-		    if(mesh.vertex.texCoord) {
+            var off = nv*12;
+            if(mesh.vertex.texCoord) {
                 geometry.uv = new Float32Array(buffer, off, nv*2);
                 off += nv*8;
             }
             if(mesh.vertex.normal) {
-				geometry.normal = new Int16Array(buffer, off, nv*3);
+                geometry.normal = new Int16Array(buffer, off, nv*3);
                 off += nv*6;
-			}
+            }
 
             if(mesh.vertex.color) {
                 geometry.color = new Uint8Array(buffer, off, nv*4);
                 off += nv*4;
-			}
+            }
 
-		
-	    } else {
+        
+        } else {
             geometry = buffer;
-	    }
+        }
 
-	    //if(nf == 0)
-    	//	scramble(nv, v, no, co);
+        //if(nf == 0)
+        //    scramble(nv, v, no, co);
 
         mesh.createNodeGeometry(id, geometry);
-	    mesh.status[id]--;
+        mesh.status[id]--;
 
-	    if(mesh.status[id] == 2) {
+        if(mesh.status[id] == 2) {
             this.readyNode(mesh, id);
-	    }
+        }
     },
 
     //the node is finished, add to cache, and update counters
@@ -337,9 +337,9 @@ _Cache.prototype = {
             this.nodes.set(mesh, new Set());
         this.nodes.get(mesh).add(id);
 
-	    mesh.status[id]--;
+        mesh.status[id]--;
         if(mesh.status[id] != 1) throw "A ready node should have status ==1"
-		    mesh.reqAttempt[id] = 0;
+            mesh.reqAttempt[id] = 0;
             this.pending--;
             mesh.createNode(id);
         for(let callback of mesh.onUpdate)
@@ -363,10 +363,10 @@ _Cache.prototype = {
         for(let c of this.candidates) {
             if(c.mesh.status[c.id] == 0 && (!best || c.error > best.error)) 
                 best = c;
-	    }
+        }
         if(!best) return;
 
-	// record amount of data transfer per second.
+    // record amount of data transfer per second.
     /*
         let now = performance.now();
         if(Math.floor(now/1000) > Math.floor(this.lastupdate/1000)) { //new second
@@ -381,7 +381,7 @@ _Cache.prototype = {
             
         //make room for new nodes!
         
-	    while(this.cacheSize > this.maxCacheSize) {
+        while(this.cacheSize > this.maxCacheSize) {
             let worst = null;
             
             //find node with smallest error in cache and remove it if worse than the best candidate.
@@ -399,12 +399,12 @@ _Cache.prototype = {
                 //(worst.frame + 30 >= best.frame && )) //dont' remove if  the best candidate is not good enogh
                 return;
             }
-		    this.removeNode(worst.mesh, worst.id);
-	    }
+            this.removeNode(worst.mesh, worst.id);
+        }
         this.totswapped += best.mesh.nsize[best.id];
         this.candidates = this.candidates.filter(e => e.mesh == best.mesh && e.id == best.id);
-    	this.requestNode(best.mesh, best.id);
-	    this.update();  //try again.
+        this.requestNode(best.mesh, best.id);
+        this.update();  //try again.
     }
 };
 
