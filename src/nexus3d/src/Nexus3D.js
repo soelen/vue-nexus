@@ -8,9 +8,9 @@ function Nexus3D(url, renderer, options) {
     if(typeof renderer == 'function') 
         throw "Nexus3D constructor has changed: Nexus3D(url, renderer, options) where options include: onLoad, onUpdate, onProgress and material"
 
-	THREE.Object3D.call( this );
+    THREE.Object3D.call( this );
 
-	this.type = 'NXS';
+    this.type = 'NXS';
 
     this.url = url;
     this.gl = renderer.getContext();
@@ -59,15 +59,14 @@ function Nexus3D(url, renderer, options) {
 
 Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
 
-	constructor: Nexus3D,
+    constructor: Nexus3D,
 
-	isNXS: true,
+    isNXS: true,
 
-	copy: function(source) {
+    copy: function(source) {
 
-		Object3D.prototype.copy.call( this, source, false );
+        THREE.Object3D.prototype.copy.call( this, source, false );
         throw "Can't really copy."
-		return this;
 
     },
 
@@ -122,7 +121,7 @@ Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
 
     onLoadCallback: function() {
         const c = this.mesh.sphere.center;
-		const center = new THREE.Vector3(c[0], c[1], c[2]);
+        const center = new THREE.Vector3(c[0], c[1], c[2]);
         const radius = this.mesh.sphere.radius;
         this.boundingSphere = new THREE.Sphere(center, radius);
 
@@ -161,7 +160,7 @@ Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
         let s = new THREE.Vector2();
         renderer.getSize(s);
 
-       	//object modelview is multiplied by camera during rendering, we need to do it here for visibility computations
+           //object modelview is multiplied by camera during rendering, we need to do it here for visibility computations
         this.modelViewMatrix.multiplyMatrices( camera.matrixWorldInverse, this.matrixWorld );
         this.traversal.updateView([0, 0, s.width, s.height], camera.projectionMatrix.elements, this.modelViewMatrix.elements);
         this.instance_errors = this.traversal.traverse(this.mesh, this.cache);
@@ -273,26 +272,26 @@ Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
             }
 
             if(this.cache.debug.nodes) {
-				gl.disableVertexAttribArray(attr.color);
+                gl.disableVertexAttribArray(attr.color);
 
                 var error = this.instance_errors[id]; //this.mesh.errors[id];
-				var palette = [
-					[1, 1, 1, 1], //white
+                var palette = [
+                    [1, 1, 1, 1], //white
                     [1, 1, 1, 1], //white
                     [0, 1, 0, 1], //green
-					[0, 1, 1, 1], //cyan
-					[1, 1, 0, 1], //yellow
+                    [0, 1, 1, 1], //cyan
+                    [1, 1, 0, 1], //yellow
                     [1, 0, 1, 1], //magenta
-					[1, 0, 0, 1]  //red
-				];
-				let w = Math.min(5.99, Math.max(0, Math.log2(error)/2));
-				let low = Math.floor(w);
-				w -= low;
-				let color = [];
-				for( let k = 0; k < 4; k++)
+                    [1, 0, 0, 1]  //red
+                ];
+                let w = Math.min(5.99, Math.max(0, Math.log2(error)/2));
+                let low = Math.floor(w);
+                w -= low;
+                let color = [];
+                for( let k = 0; k < 4; k++)
                     color[k] = palette[low][k]*(1-w) + palette[low+1][k]*w;
                     
-				gl.vertexAttrib4fv(attr.color, color);
+                gl.vertexAttrib4fv(attr.color, color);
             }
             this.cache.realError = Math.min(this.mesh.errors[id], this.cache.realError);
             
@@ -310,14 +309,14 @@ Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
 
                 if(end > offset) {
                     if(m.vertex.texCoord && attr.uv >= 0) {
-						var tex = m.patches[p*3+2];
-						if(tex != -1) { //bind texture
-							var texid = this.textures[tex];
-							gl.activeTexture(gl.TEXTURE0 + attr.map);
-							gl.bindTexture(gl.TEXTURE_2D, texid);
-						}
-					}
-					gl.drawElements(gl.TRIANGLES, (end - offset) * 3, gl.UNSIGNED_SHORT, offset * 6);
+                        var tex = m.patches[p*3+2];
+                        if(tex != -1) { //bind texture
+                            var texid = this.textures[tex];
+                            gl.activeTexture(gl.TEXTURE0 + attr.map);
+                            gl.bindTexture(gl.TEXTURE_2D, texid);
+                        }
+                    }
+                    gl.drawElements(gl.TRIANGLES, (end - offset) * 3, gl.UNSIGNED_SHORT, offset * 6);
                     rendered += end - offset;
                 }
                 offset = m.patches[p*3+1];
@@ -336,13 +335,13 @@ Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
         let vertices = new ArrayBuffer(nv*m.vsize);
         var position = new Float32Array(vertices, 0, nv*3);
         position.set(data.position);
-		var off = nv*12;
-		if(m.vertex.texCoord) {
+        var off = nv*12;
+        if(m.vertex.texCoord) {
             var uv = new Float32Array(vertices, off, nv*2);
             uv.set(data.uv);
-			off += nv*8;
-		}
-		if(m.vertex.color) {
+            off += nv*8;
+        }
+        if(m.vertex.color) {
             var color = new Uint8Array(vertices, off, nv*4);
             color.set(data.color);
             off += nv*4;
@@ -351,7 +350,7 @@ Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
             var normal = new Int16Array(vertices, off, nv*3);
             normal.set(data.normal);
             off += nv*6;
-		}
+        }
         
         //needed for approximate picking.
         if(id < this.mesh.nroots) {
@@ -377,23 +376,23 @@ Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
     createTexture: function(id, image) {
         let gl = this.gl;
         var flip = gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
-		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-		let tex = this.textures[id] = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        let tex = this.textures[id] = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
 
         //TODO some textures might be alpha only! save space
-		var s = gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        var s = gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
         function powerOf2(n) { return n && (n & (n - 1)) === 0; }
-		if(!(gl instanceof WebGLRenderingContext) || (powerOf2(image.width) && powerOf2(image.height))) {
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-			gl.generateMipmap(gl.TEXTURE_2D);
-		} else {
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		}
+        if(!(gl instanceof WebGLRenderingContext) || (powerOf2(image.width) && powerOf2(image.height))) {
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+            gl.generateMipmap(gl.TEXTURE_2D);
+        } else {
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        }
 
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);   
     },
@@ -401,7 +400,7 @@ Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
     //TODO check if this is really needed!
     deleteNodeGeometry: function(id) {
         this.gl.deleteBuffer(this.vbo[id]);
-	    this.gl.deleteBuffer(this.ibo[id]);
+        this.gl.deleteBuffer(this.ibo[id]);
         this.vbo[id] = this.ibo[id] = null;
     },
 
@@ -413,19 +412,19 @@ Nexus3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
         this.textures[tex] = 0;
     },
 
-	flush: function() {
-		this.cache.flush(this.mesh);
-	},
+    flush: function() {
+        this.cache.flush(this.mesh);
+    },
 
-	dispose: function() {
-		this.flush();
-		for(let child of this.children)
-			child.geometry.dispose();
-	},
+    dispose: function() {
+        this.flush();
+        for(let child of this.children)
+            child.geometry.dispose();
+    },
 
-	toJSON: function ( meta ) {
-		throw "Can't";
-	},
+    toJSON: function ( meta ) {
+        throw "Can't";
+    },
 
 } );
 

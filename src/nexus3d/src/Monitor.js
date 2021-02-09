@@ -24,13 +24,13 @@ THE SOFTWARE.
 
 let css = `
 #nexusMonitor {
-	position:absolute; 
-	top:10px; left:10px; 
-	opacity:0.7; 
-	background-color:black; 
-	color:white;
-	padding:10px 20px;
-	width:300px; 
+    position:absolute; 
+    top:10px; left:10px; 
+    opacity:0.7; 
+    background-color:black; 
+    color:white;
+    padding:10px 20px;
+    width:300px; 
     font-family:Arial;
     font-size: 12px;
 }
@@ -38,25 +38,25 @@ let css = `
 #nexusMonitor p { margin:0px 10px; padding:5px 0px; }
 
 .progress {
-	color:black;
-	height: 1.5em;
-	width: 240px;
-	background-color: #c9c9c9;
-	position: relative;
+    color:black;
+    height: 1.5em;
+    width: 240px;
+    background-color: #c9c9c9;
+    position: relative;
 }
 .progress:before {
-	content: attr(data-label);
-	font-size: 0.8em;
-	position: absolute;
-	text-align: center;
-	top: 5px;
-	left: 0;
-	right: 0;
+    content: attr(data-label);
+    font-size: 0.8em;
+    position: absolute;
+    text-align: center;
+    top: 5px;
+    left: 0;
+    right: 0;
 }
 .progress .value {
-	background-color: #7cc4ff;
-	display: inline-block;
-	height: 100%;
+    background-color: #7cc4ff;
+    display: inline-block;
+    height: 100%;
 }`
 
 
@@ -118,25 +118,25 @@ function Monitor(cache) {
         document.head.appendChild(style);
 
 
-    	this.div = document.createElement('div');
-    	this.div.setAttribute('id', 'nexusMonitor');
+        this.div = document.createElement('div');
+        this.div.setAttribute('id', 'nexusMonitor');
 
         this.div.innerHTML = html;
         let e = this.elements = {
             cacheLabel: this.div.querySelector('#nexusMonitorCache'),
-	        cacheStyle: this.div.querySelector('#nexusMonitorCache > span'),
-	        errorLabel: this.div.querySelector('#nexusMonitorError'),
-	        errorStyle: this.div.querySelector('#nexusMonitorError > span'),
-    	    fpsLabel  : this.div.querySelector('#nexusMonitorFps'),
-	        fpsStyle  : this.div.querySelector('#nexusMonitorFps > span'),
+            cacheStyle: this.div.querySelector('#nexusMonitorCache > span'),
+            errorLabel: this.div.querySelector('#nexusMonitorError'),
+            errorStyle: this.div.querySelector('#nexusMonitorError > span'),
+            fpsLabel  : this.div.querySelector('#nexusMonitorFps'),
+            fpsStyle  : this.div.querySelector('#nexusMonitorFps > span'),
 
-	        trianglesCount: this.div.querySelector('#nexusMonitorTriangles'),
-	        nodesCheckbox : this.div.querySelector('#nexusMonitorNodes'),
+            trianglesCount: this.div.querySelector('#nexusMonitorTriangles'),
+            nodesCheckbox : this.div.querySelector('#nexusMonitorNodes'),
             editError     : this.div.querySelector('#nexusMonitorEditError')
         }
 
         let cache = this.cache;
-	    e.nodesCheckbox.addEventListener('click', function() { 
+        e.nodesCheckbox.addEventListener('click', function() { 
             cache.debug.nodes = this.checked; 
             for( let [mesh, ids] of cache.nodes) {
                 for(let  callback of mesh.onUpdate)
@@ -144,13 +144,13 @@ function Monitor(cache) {
             }
         });
 
-	    e.editError.addEventListener('change', function() { 
+        e.editError.addEventListener('change', function() { 
             cache.targetError = this.value;
             for( let [mesh, ids] of cache.nodes) {
                 for(let  callback of mesh.onUpdate)
                     callback(mesh);
             }
-	    });
+        });
 
         document.body.appendChild(this.div);
 
@@ -159,42 +159,42 @@ function Monitor(cache) {
 }
 
 Monitor.prototype = { 
-	update: function () {
-		let context = this.cache;
+    update: function () {
+        let context = this.cache;
 
-		let cacheSize = context.cacheSize;
-		let maxCacheSize = context.maxCacheSize;
-		let cacheFraction = parseInt(100*cacheSize/maxCacheSize);
+        let cacheSize = context.cacheSize;
+        let maxCacheSize = context.maxCacheSize;
+        let cacheFraction = parseInt(100*cacheSize/maxCacheSize);
 
-		let targetError = context.targetError;
-		let realError = Math.min(1000, context.realError);
-		let currentError = context.currentError;
-		let errorFraction = 100*Math.min(5, Math.log2(currentError/targetError))/5;
+        let targetError = context.targetError;
+        let realError = Math.min(1000, context.realError);
+        let currentError = context.currentError;
+        let errorFraction = 100*Math.min(5, Math.log2(currentError/targetError))/5;
 
-		let minFps = context.minFps;
-		let currentFps = context.currentFps;
-		let fpsFraction = 100*(Math.min(3, Math.max(0, 60/currentFps  -1)))/3;
+        let minFps = context.minFps;
+        let currentFps = context.currentFps;
+        let fpsFraction = 100*(Math.min(3, Math.max(0, 60/currentFps  -1)))/3;
 
         let rendered = context.rendered;
         
         let e = this.elements;
 
-		e.cacheLabel.setAttribute('data-label', `${toHuman(cacheSize, 'B')}/${toHuman(maxCacheSize, 'B')}`);
-		e.cacheStyle.style.background_color = greenToRed(cacheFraction);
-		e.cacheStyle.style.width = cacheFraction;
+        e.cacheLabel.setAttribute('data-label', `${toHuman(cacheSize, 'B')}/${toHuman(maxCacheSize, 'B')}`);
+        e.cacheStyle.style.background_color = greenToRed(cacheFraction);
+        e.cacheStyle.style.width = cacheFraction;
 
-		e.errorLabel.setAttribute('data-label', `Real: ${realError.toFixed(1)} px  Target: ${currentError.toFixed(1)} px`);
-		e.errorStyle.style.background_color = greenToRed(errorFraction);
-		e.errorStyle.style.width = errorFraction;
+        e.errorLabel.setAttribute('data-label', `Real: ${realError.toFixed(1)} px  Target: ${currentError.toFixed(1)} px`);
+        e.errorStyle.style.background_color = greenToRed(errorFraction);
+        e.errorStyle.style.width = errorFraction;
 
-		e.fpsLabel.setAttribute('data-label', `${parseInt(Math.round(currentFps))} fps`);
-		e.fpsStyle.style.background_color = greenToRed(fpsFraction);
-		e.fpsStyle.style.width = fpsFraction;
+        e.fpsLabel.setAttribute('data-label', `${parseInt(Math.round(currentFps))} fps`);
+        e.fpsStyle.style.background_color = greenToRed(fpsFraction);
+        e.fpsStyle.style.width = fpsFraction;
 
-		e.trianglesCount.innerHTML = `${toHuman(rendered)} triangles`;
+        e.trianglesCount.innerHTML = `${toHuman(rendered)} triangles`;
 
-		if(!e.editError.value)
-			e.editError.value = targetError;
+        if(!e.editError.value)
+            e.editError.value = targetError;
     },
     
     start: function() {

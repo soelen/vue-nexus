@@ -40,7 +40,7 @@ Mesh.prototype = {
                 const header = mesh.importHeader(view);
                 if(!header) {
                     if(Debug.verbose) console.log("Empty header!");
-                    if(mesh.reqAttempt < maxReqAttempt) mesh.open(mesh.url + '?' + Math.random()); // BLINK ENGINE CACHE BUG PATCH
+                    if(mesh.reqAttempt < 100 ) mesh.open(mesh.url + '?' + Math.random()); // BLINK ENGINE CACHE BUG PATCH
                     return;
                 }
                 mesh.reqAttempt = 0;
@@ -69,12 +69,14 @@ Mesh.prototype = {
             switch (this.status){
                 case 0:
 //					console.log("0 response: server unreachable.");//returned in chrome for local files
+                    break;
                 case 206:
 //					console.log("206 response: partial content loaded.");
                     load.bind(this)();
                     break;
                 case 200:
 //					console.log("200 response: server does not support byte range requests.");
+                    break;
             }
         };
         r.onerror = error;

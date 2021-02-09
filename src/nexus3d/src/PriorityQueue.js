@@ -45,7 +45,8 @@ PriorityQueue.prototype = {
         var data = this.data[n];
         var error = this.error[n];
 
-        while(true) {
+        let loop = true;
+        while( loop ) {
             var child2N = (n + 1) * 2;
             var child1N = child2N - 1;
             var swap = -1;
