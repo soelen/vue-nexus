@@ -186,7 +186,7 @@ _Cache.prototype = {
         let t = this;
 
         if(mesh.reqAttempt[id] > maxReqAttempt) {
-            if(this.debug.verbose) console.log("Max request limit for " + m.url + " node: " + n);
+            if(this.debug.verbose) console.log("Max request limit for " + " node: " );
             t.removeNode(mesh, id);
             return;
         }
@@ -196,11 +196,11 @@ _Cache.prototype = {
         switch (mode){
         case 0:
             t.requestNodeGeometry(mesh, id);
-            if(this.debug.verbose) console.log("Recovering geometry for " + m.url + " node: " + n);
+            if(this.debug.verbose) console.log("Recovering geometry for " + " node: " );
             break;
         case 1:
             t.requestNodeTexture(mesh, id);
-            if(this.debug.verbose) console.log("Recovering texture for " + m.url + " node: " + n);
+            if(this.debug.verbose) console.log("Recovering texture for " + " node: " );
             break;
         }
     },
