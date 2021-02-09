@@ -25,7 +25,7 @@ export default {
       camera: null,
       scene: null,
       renderer: null,
-      mesh: null
+      mesh: null,
     }
   },
   methods: {
@@ -35,7 +35,7 @@ export default {
         this.redraw = false;
         this.clock = new Three.Clock();
         this.mouse = new Three.Vector2();
-        
+        this.axes = [];
 
         this.camera = new Three.PerspectiveCamera(70, this.container.clientWidth / this.container.clientHeight, 0.01, 10);
         this.camera.position.z = 3;
@@ -74,9 +74,6 @@ export default {
 
         this.controls = new OrbitControls( this.camera, this.container );
 
-        // for( const [key, value] of Object.entries(controls_options))
-          // controls[key] = value; 
-
         this.controls.addEventListener( 'change', function() { this.redraw = true; } );
 
         var url = "gargo.nxz"; 
@@ -91,41 +88,58 @@ export default {
         this.scene.add(this.nexus1);
         this.scene.add(this.nexus2);
 
-        this.renderer.setAnimationLoop( () => {
-          const delta = this.clock.getDelta()
-
-          this.controls.update(delta);
-
-          if(this.redraw) {
-          //during rendering it might be apparent we need another render pass, set it to false BEFORE render
-          this.redraw = true; 
-
-
-          var raycaster = new Three.Raycaster();
-          raycaster.setFromCamera( this.mouse, this.camera );
-
-          var intersections = raycaster.intersectObjects( [this.nexus1], true );
-          if(intersections.length) {
-            console.log( intersections );
-          this.nexus1.material.color =  new Three.Color(1, 0, 0);
-          this.nexus1.material.needsUpdate = true;
-          } else {
-          this.nexus1.material.color =  new Three.Color(1, 1, 1);
-          }
-
-
-          Nexus3D.Cache.beginFrame(30);
-          this.renderer.render( this.scene, this.camera );
-          Nexus3D.Cache.endFrame();
-
-
-    }
-
-})
+        this.renderer.setAnimationLoop( this.onLoop );
 
     document.addEventListener( 'mousemove', this.onMouseMove, false );
     new ResizeObserver( this.onWindowResize ).observe( this.container);
 
+    },
+    onLoop() {
+      const delta = this.clock.getDelta()
+
+      this.controls.update(delta);
+
+      if(this.redraw) {
+        //during rendering it might be apparent we need another render pass, set it to false BEFORE render
+        this.redraw = true; 
+
+
+        var raycaster = new Three.Raycaster();
+        raycaster.setFromCamera( this.mouse, this.camera );
+
+
+        var intersections = raycaster.intersectObjects( [this.nexus1], true );
+        if(intersections.length) {
+
+          this.updateAxes( intersections );
+          this.nexus1.material.color =  new Three.Color(1, 0, 0);
+          this.nexus1.material.needsUpdate = true;
+        } else {
+        this.nexus1.material.color =  new Three.Color(1, 1, 1);
+        }
+
+
+        Nexus3D.Cache.beginFrame(30);
+        this.renderer.render( this.scene, this.camera );
+        Nexus3D.Cache.endFrame();
+      }
+    },
+    updateAxes( intersections ) {
+      this.axes.forEach( ( axe, index ) => {
+
+        this.scene.remove( axe );
+
+      } );
+
+      this.axes = [];
+
+      intersections.forEach( intersection => {
+        const axe = new Three.AxesHelper( .3 );
+        axe.position.set( intersection.point.x, intersection.point.y, intersection.point.z );
+        this.axes.push( axe );
+        this.scene.add( axe );
+
+      } );
     },
     onWindowResize() {
       this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
@@ -146,7 +160,7 @@ export default {
       const s   = 1/nexus.boundingSphere.radius;
       //nexus.rotateX(-3.1415/2);
 
-      if(nexus == this.nexus1) {
+      if( nexus == this.nexus1 ) {
         nexus.position.set(p.x*s + 1, p.y*s, p.z*s);
       } else
         nexus.position.set(p.x*s - 1, p.y*s, p.z*s);
@@ -154,16 +168,10 @@ export default {
       nexus.scale.set(s, s, s); 
       this.redraw = true;
     },
-    // animate: function() {
-    //     requestAnimationFrame(this.animate);
-    //     this.mesh.rotation.x += 0.01;
-    //     this.mesh.rotation.y += 0.02;
-    //     this.renderer.render(this.scene, this.camera);
-    // }
   },
   mounted() {
-      this.init();
-      // this.animate();
+    this.init();
+    this.onWindowResize();
   }
 }
 </script>
